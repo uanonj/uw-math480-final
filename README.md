@@ -2,8 +2,8 @@ uw-math480-final
 ================
 
 UW Math 480, Spring 2013, Final Project  
-Jason Uanon, Ayla Lampard
-Last Updated: May 14, 2013
+Jason Uanon, Ayla Lampard  
+Last Updated: May 14, 2013  
 
 Our project will attempt to predict whether a person's income exceeds $50k/yr in 1994 based on census data for that year. We will use the "Adult Data Set" from the UCI Machine Learning Repository[1], which contains over 32,000 training instances and over 16,000 test instances of census data containing 14 attributes (http://archive.ics.uci.edu/ml/datasets/Adult).
 
