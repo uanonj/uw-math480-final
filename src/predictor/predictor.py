@@ -14,25 +14,70 @@ data must satisfy the following interface:
 
 import data
 import decision_tree
+import decision_tree_cy
+import collections
+import time
 
-def process(data_file, total_data, attribute_counts):
+CORRECT = "correct"
+INCORRECT = "incorrect"
+
+def time_prediction(f):
+    start_time = time.time()
+    f()
+    print "time:", time.time()-start_time, "seconds"
+
+def process(data_file):
+    result = []
     for line in data_file:
-        if len(line) > 0:
-            line_data = line.split(", ")
-            # stop the loop one short; the last attribute
-            # is the target attribute
-            for i in range(len(line_data) - 1):
-                data.classify(i, line_data[i], line_data[data.NUM_ATTRIBUTES].strip(), total_data, attribute_counts)
+        to_process = line.strip()
+        if len(to_process) > 0:
+            result.append(data.process_line(to_process))
+    return result
 
-def main():
+def percent(num, den):
+    return str(round(float(num) * 100.0 / den, 3)) + "%"
+
+def report_results(counter):
+    print CORRECT, counter[CORRECT]
+    print INCORRECT, counter[INCORRECT]
+    print "accuracy:", percent(counter[CORRECT], counter[CORRECT] + counter[INCORRECT])
+
+def train_and_test(dtree_module):
     # train the decision tree
     data_file = open(data.DATA_FILE)
-    total_data = data.initialize_totals()
-    attribute_counts = data.initialize_attribute_counts()
-    process(data_file, total_data, attribute_counts)
+    examples = process(data_file)
     data_file.close()
+    dtree = dtree_module.build_tree(examples, data.ATTRIBUTES, data.VALUES)
     # test the decision tree
     test_file = open(data.TEST_FILE)
+    test_examples = process(test_file)
+    test_file.close()
+    counter = collections.Counter()
+    for test in test_examples:
+        prediction = dtree_module.predict(dtree, test)
+        actual = dtree_module.example_target_value(test)
+        # for some reason the test data appends a "." at the end
+        # of each example, which messes up the predictor.
+        actual = actual[0:len(actual)-1]
+        if prediction == actual:
+            counter[CORRECT] += 1
+        else:
+            counter[INCORRECT] += 1
+    report_results(counter)
+
+def train_and_test_normal():
+    train_and_test(decision_tree)
+
+def train_and_test_cython():
+    train_and_test(decision_tree_cy)
+
+def main():
+    print "Beginning python version"
+    time_prediction(train_and_test_normal)
+    print "Done with python version"
+    print "Beginning cython version"
+    time_prediction(train_and_test_cython)
+    print "Done."
 
 if __name__ == '__main__':
     main()

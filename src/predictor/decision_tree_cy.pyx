@@ -17,11 +17,11 @@ class DecisionTreeNode(object):
     def is_leaf(self):
         return len(self.children) == 0
 
-def example_target_value(example):
+cpdef example_target_value(example):
     """Returns the target value of the given example."""
     return example[len(example)-1]
 
-def entropy(counts, total):
+cdef entropy(counts, total):
     """
     Computes the entropy of the examples represented by
     the set of counts and total.
@@ -35,7 +35,7 @@ def entropy(counts, total):
             entr -= ratio * math.log(ratio, 2)
     return entr
 
-def information_gain(examples, attribute, values):
+cdef information_gain(examples, attribute, values):
     """
     Computes the information gain of the examples conditioned on
     the given attribute.
@@ -66,7 +66,7 @@ def information_gain(examples, attribute, values):
         info_gain -= ratio * entropy(conditional_counts[value], value_counts[value])
     return info_gain
 
-def most_common_label(examples):
+cdef most_common_label(examples):
     """Returns the most common target label among the examples"""
     count = collections.Counter()
     for example in examples:
@@ -79,7 +79,7 @@ def most_common_label(examples):
             max_label = label
     return max_label
 
-def build_tree(examples, attributes, values):
+cpdef build_tree(examples, attributes, values):
     """
     build_tree Recursively builds a decision tree using information gain as the splitting criterion.
 
@@ -125,7 +125,7 @@ def build_tree(examples, attributes, values):
                     result.add_child(new_root)
     return result
 
-def predict(root, example):
+cpdef predict(root, example):
     node = root
     while not node.is_leaf():
         for child in node.children:
