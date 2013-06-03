@@ -3,29 +3,64 @@ import collections
 
 UNKNOWN = "?"
 
-class DecisionTreeNode(object):
-    def __init__(self, label=None, attribute=None, value=None):
+cdef class DecisionTreeNode(object):
+    cdef object label, attribute, value, children
+
+    def __cinit__(self, label=None, attribute=None, value=None):
         self.label = label
         self.attribute = attribute
         self.value = value
         self.children = []
 
-    def add_child(self, child):
+    cpdef add_child(self, child):
         if child != None:
             self.children.append(child)
 
-    def is_leaf(self):
+    cpdef is_leaf(self):
         return len(self.children) == 0
+
+    property label:
+        def __get__(self):
+            return self.label
+        def __set__(self, value):
+            self.label = value
+        def __del__(self):
+            del self.label
+
+    property attribute:
+        def __get__(self):
+            return self.attribute
+        def __set__(self, value):
+            self.attribute = value
+        def __del__(self):
+            del self.attribute
+
+    property value:
+        def __get__(self):
+            return self.value
+        def __set__(self, value):
+            self.value = value
+        def __del__(self):
+            del self.value
+
+    property children:
+        def __get__(self):
+            return self.children
+        def __set__(self, value):
+            self.children = value
+        def __del__(self):
+            del self.children
 
 cpdef example_target_value(example):
     """Returns the target value of the given example."""
     return example[len(example)-1]
 
-cdef entropy(counts, total):
+cdef double entropy(counts, int total):
     """
     Computes the entropy of the examples represented by
     the set of counts and total.
     """
+    cdef double entr, ratio
     entr = 0.0
     for value in counts:
         ratio = float(counts[value]) / total
@@ -35,11 +70,13 @@ cdef entropy(counts, total):
             entr -= ratio * math.log(ratio, 2)
     return entr
 
-cdef information_gain(examples, attribute, values):
+cdef double information_gain(examples, attribute, values):
     """
     Computes the information gain of the examples conditioned on
     the given attribute.
     """
+    cdef int total
+    cdef double info_gain
     total = len(examples)
     counts = collections.Counter()
     value_counts = collections.Counter()
